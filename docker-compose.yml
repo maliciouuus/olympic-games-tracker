@@ -1,0 +1,6 @@
+services:
+  frontend:
+    image: olympic-games-tracker
+    build: .
+    ports:
+      - "80:80"
