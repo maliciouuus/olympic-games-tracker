@@ -25,11 +25,25 @@ jobs:
       - name: Install Chrome
         uses: browser-actions/setup-chrome@v1
 
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: .npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json') }}
+          restore-keys: ${{ runner.os }}-npm-
+
       - name: Install dependencies
         run: npm ci --cache .npm --prefer-offline
 
       - name: Run tests
         run: npm test
+
+      - name: Upload JUnit reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: angular-test-results
+          path: test-results/
 
   build:
     name: Build & Push image
@@ -56,6 +70,7 @@ jobs:
           push: true
           tags: |
             ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:${{ github.ref_name }}
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
 
   release:
